@@ -1,7 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState, type ReactElement, type ReactNode } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type MouseEvent,
+  type ReactElement,
+  type ReactNode,
+} from "react";
 
 /* ================================================================== */
 /*  DATA — swap these placeholders for business-approved content      */
@@ -209,28 +216,158 @@ function Navbar() {
 }
 
 /* ================================================================== */
-/*  HERO                                                               */
+/*  HERO — split-flap destination switcher with cursor-driven depth   */
+/*                                                                      */
+/*  Concept: the headline ends in a word that "flips" like an airport  */
+/*  departures board (real 3D rotateX per character) as it cycles      */
+/*  through Beaches / Hill Country / Wildlife / Heritage / Tea Trails. */
+/*  The background photo crossfades to match, and the whole scene      */
+/*  drifts gently with the cursor for a subtle parallax depth. A rail  */
+/*  on the right lets people jump straight to the one they want.       */
 /* ================================================================== */
 
-function Hero() {
-  return (
-    <section className="relative flex min-h-[92vh] items-center overflow-hidden bg-stone-900">
-      <div className="absolute inset-0 scale-105 bg-cover bg-center animate-hero-zoom" style={{ backgroundImage: "url('https://picsum.photos/seed/achii-hero/1800/1200')" }} />
-      <div className="absolute inset-0 bg-gradient-to-t from-stone-950/85 via-stone-900/45 to-stone-900/20" />
+const HERO_AUTOPLAY_MS = 4200;
+const FLIP_WIDTH = Math.max(...destinationHighlights.map((d) => d.title.length));
 
-      <div className="relative z-10 mx-auto w-full max-w-7xl px-5 pb-20 pt-32 sm:px-8">
-        <div className="max-w-2xl">
-          <h1 className="animate-fade-up text-4xl font-semibold leading-tight text-white sm:text-5xl md:text-6xl [animation-delay:100ms]">
-            Planned properly by the people who live here.
-          </h1>
-          <p className="animate-fade-up mt-5 max-w-xl text-base text-white/85 sm:text-lg [animation-delay:280ms]">
-            Ready-made tours and day trips through Sri Lanka&apos;s highlights. Or customise your own independent route, hotels, guides and transport.
-          </p>
-          <div className="animate-fade-up mt-9 [animation-delay:440ms]">
-            <HeroSearchBar />
+function useReducedMotion() {
+  const [reduced, setReduced] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setReduced(mq.matches);
+    const onChange = () => setReduced(mq.matches);
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
+  return reduced;
+}
+
+function FlipWord({ word, still }: { word: string; still: boolean }) {
+  const padded = word.toUpperCase().padEnd(FLIP_WIDTH, "\u00A0");
+  return (
+    <span className="inline-flex flex-wrap" style={{ perspective: "500px" }}>
+      {padded.split("").map((ch, i) => (
+        <span
+          key={still ? `static-${i}` : `${word}-${i}`}
+          className={still ? "flap-char" : "flap-char flap-char--animated"}
+          style={still ? undefined : { animationDelay: `${i * 24}ms` }}
+        >
+          {ch}
+        </span>
+      ))}
+    </span>
+  );
+}
+
+function DestinationRail({
+  active,
+  onSelect,
+  cycleKey,
+  reducedMotion,
+}: {
+  active: number;
+  onSelect: (i: number) => void;
+  cycleKey: number;
+  reducedMotion: boolean;
+}) {
+  return (
+    <div className="flex flex-col gap-0.5">
+      {destinationHighlights.map((dest, i) => {
+        const isActive = i === active;
+        return (
+          <button
+            key={dest.title}
+            type="button"
+            onClick={() => onSelect(i)}
+            aria-current={isActive}
+            className={`group flex items-center gap-3 rounded-lg py-2 pl-2 pr-3 text-left transition-colors duration-200 ${isActive ? "text-white" : "text-white/45 hover:text-white/80"}`}
+          >
+            <span className="w-4 shrink-0 text-[11px] tabular-nums">{String(i + 1).padStart(2, "0")}</span>
+            <span className="flex-1 text-sm font-medium">{dest.title}</span>
+            <span className="relative h-[3px] w-10 shrink-0 overflow-hidden rounded-full bg-white/15">
+              {isActive && !reducedMotion && (
+                <span key={cycleKey} className="progress-fill absolute inset-y-0 left-0 rounded-full bg-amber-400" style={{ animationDuration: `${HERO_AUTOPLAY_MS}ms` }} />
+              )}
+              {isActive && reducedMotion && <span className="absolute inset-0 rounded-full bg-amber-400" />}
+            </span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function Hero() {
+  const reducedMotion = useReducedMotion();
+  const [active, setActive] = useState(0);
+  const [cycleKey, setCycleKey] = useState(0);
+  const [tilt, setTilt] = useState({ x: 0, y: 0 });
+  const heroRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    if (reducedMotion) return;
+    const timer = setTimeout(() => {
+      setActive((a) => (a + 1) % destinationHighlights.length);
+      setCycleKey((k) => k + 1);
+    }, HERO_AUTOPLAY_MS);
+    return () => clearTimeout(timer);
+  }, [active, reducedMotion]);
+
+  function selectDestination(i: number) {
+    if (i === active) return;
+    setActive(i);
+    setCycleKey((k) => k + 1);
+  }
+
+  function handleMouseMove(e: MouseEvent<HTMLElement>) {
+    if (reducedMotion) return;
+    const rect = heroRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    setTilt({
+      x: (e.clientX - rect.left) / rect.width - 0.5,
+      y: (e.clientY - rect.top) / rect.height - 0.5,
+    });
+  }
+
+  function handleMouseLeave() {
+    setTilt({ x: 0, y: 0 });
+  }
+
+  const activeDestination = destinationHighlights[active];
+
+  return (
+    <section
+      ref={heroRef}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      className="relative flex min-h-[94vh] items-center overflow-hidden bg-[#0A1D19]"
+      style={{ perspective: "1200px" }}
+    >
+      {/* Background stack: crossfading destination photography, drifting with the cursor */}
+      <div
+        className="absolute inset-0 transition-transform duration-300 ease-out"
+        style={
+          reducedMotion
+            ? undefined
+            : { transform: `translate3d(${tilt.x * -22}px, ${tilt.y * -16}px, 0) scale(1.08)` }
+        }
+      >
+        {destinationHighlights.map((dest, i) => (
+          <div
+            key={dest.title}
+            className={`absolute inset-0 transition-opacity duration-[1400ms] ease-in-out ${i === active ? "opacity-100" : "opacity-0"}`}
+          >
+            <img
+              key={i === active ? cycleKey : "idle"}
+              src={dest.image}
+              alt=""
+              className={`h-full w-full object-cover ${i === active && !reducedMotion ? "animate-hero-pan" : ""}`}
+            />
           </div>
-        </div>
+        ))}
       </div>
+
+      <div className="absolute inset-0 bg-gradient-to-t from-[#06120F] via-[#0A1D19]/55 to-[#0A1D19]/10" />
+      <div className="absolute inset-0 bg-gradient-to-r from-[#06120F]/75 via-transparent to-transparent" />
 
       <div className="animate-fade-in absolute right-6 top-24 z-10 hidden [animation-delay:700ms] sm:block md:right-12">
         <div className="relative flex h-24 w-24 items-center justify-center rounded-full border-2 border-amber-300/80 bg-stone-900/40 text-center text-[10px] font-semibold uppercase leading-tight text-amber-200 shadow-lg backdrop-blur animate-spin-slow">
@@ -241,26 +378,79 @@ function Hero() {
           2024
         </div>
       </div>
-    </section>
-  );
-}
 
-function HeroSearchBar() {
-  return (
-    <form className="flex w-full max-w-xl flex-col gap-3 rounded-2xl bg-white/95 p-3 shadow-xl backdrop-blur sm:flex-row sm:items-center sm:gap-2 sm:rounded-full">
-      <label className="flex-1 px-3 py-1.5">
-        <span className="block text-[11px] font-medium uppercase tracking-wide text-stone-400">Destination</span>
-        <input type="text" placeholder="Where do you want to go?" className="w-full border-0 bg-transparent p-0 text-sm text-stone-800 placeholder:text-stone-400 focus:outline-none focus:ring-0" />
-      </label>
-      <span className="hidden h-8 w-px bg-stone-200 sm:block" />
-      <label className="flex-1 px-3 py-1.5">
-        <span className="block text-[11px] font-medium uppercase tracking-wide text-stone-400">Travel Dates</span>
-        <input type="text" placeholder="Add dates" className="w-full border-0 bg-transparent p-0 text-sm text-stone-800 placeholder:text-stone-400 focus:outline-none focus:ring-0" />
-      </label>
-      <button type="submit" className="w-full shrink-0 rounded-full bg-amber-400 px-6 py-3 text-sm font-semibold text-stone-900 transition-all duration-200 hover:-translate-y-0.5 hover:bg-amber-300 hover:shadow-lg sm:w-auto">
-        Search Trips
-      </button>
-    </form>
+      <div
+        className="relative z-10 mx-auto w-full max-w-7xl px-5 pb-16 pt-32 transition-transform duration-300 ease-out sm:px-8"
+        style={reducedMotion ? undefined : { transform: `translate3d(${tilt.x * 8}px, ${tilt.y * 6}px, 0)` }}
+      >
+        <div className="grid grid-cols-1 gap-12 lg:grid-cols-[minmax(0,1fr)_240px] lg:items-end">
+          <div className="max-w-2xl">
+            <p className="animate-fade-up text-sm font-medium uppercase tracking-[0.14em] text-amber-300/80 [animation-delay:80ms]">
+              Achii Lanka Tours
+            </p>
+            <h1 className="animate-fade-up mt-4 text-4xl font-semibold leading-[1.08] text-white sm:text-5xl md:text-[3.35rem] [animation-delay:180ms]">
+              The Sri Lanka you&apos;re
+              <br />
+              picturing is
+              <br />
+              <FlipWord word={activeDestination.title} still={reducedMotion} />
+            </h1>
+            <p className="animate-fade-up mt-6 max-w-md text-base text-white/80 sm:text-lg [animation-delay:340ms]">
+              {activeDestination.subtitle ?? "Every region, one local team arranging it door to door."} Ready-made tours through it, or a route built just for you.
+            </p>
+            <div className="animate-fade-up mt-8 flex flex-wrap gap-3 [animation-delay:480ms]">
+              <Link href="/plan-my-trip" className="rounded-full bg-amber-400 px-6 py-3 text-sm font-semibold text-stone-900 transition-all duration-200 hover:-translate-y-0.5 hover:bg-amber-300 hover:shadow-lg">
+                Plan My Trip
+              </Link>
+              <Link href={activeDestination.href} className="rounded-full border border-white/30 px-6 py-3 text-sm font-semibold text-white transition-colors duration-200 hover:bg-white/10">
+                Explore {activeDestination.title}
+              </Link>
+            </div>
+          </div>
+
+          <div className="animate-fade-in [animation-delay:600ms]">
+            <p className="mb-2 pl-2 text-[11px] font-medium uppercase tracking-[0.14em] text-white/40">Or start somewhere else</p>
+            <DestinationRail active={active} onSelect={selectDestination} cycleKey={cycleKey} reducedMotion={reducedMotion} />
+          </div>
+        </div>
+      </div>
+
+      <style jsx global>{`
+        .flap-char {
+          display: inline-block;
+          min-width: 0.6em;
+          text-align: center;
+          color: #f2ecd9;
+          font-variant-numeric: tabular-nums;
+        }
+        .flap-char--animated {
+          transform-origin: 50% 100%;
+          animation: flap-in 520ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+        }
+        @keyframes flap-in {
+          0% { transform: rotateX(-95deg); opacity: 0; }
+          55% { transform: rotateX(14deg); opacity: 1; }
+          100% { transform: rotateX(0deg); opacity: 1; }
+        }
+        @keyframes hero-pan {
+          0% { transform: scale(1.02) translate3d(0, 0, 0); }
+          100% { transform: scale(1.12) translate3d(-1.5%, -1.5%, 0); }
+        }
+        .animate-hero-pan { animation: hero-pan 6s ease-out forwards; }
+        .progress-fill {
+          animation-name: fill-bar;
+          animation-timing-function: linear;
+          animation-fill-mode: forwards;
+        }
+        @keyframes fill-bar {
+          from { width: 0%; }
+          to { width: 100%; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .flap-char--animated, .animate-hero-pan, .progress-fill { animation: none !important; }
+        }
+      `}</style>
+    </section>
   );
 }
 
