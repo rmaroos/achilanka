@@ -9,17 +9,10 @@ import {
   type ReactElement,
   type ReactNode,
 } from "react";
+
 /* -------------------------------------------------------------------------- */
 /* Data                                                                       */
 /* -------------------------------------------------------------------------- */
-
-const NAV_LINKS = [
-  { label: "Home", href: "/" },
-  { label: "Where to Go", href: "/explore" },
-  { label: "What to Do", href: "/activities" },
-  { label: "Reach Us", href: "/contact" },
-  { label: "Our Story", href: "/about" },
-];
 
 type Channel = {
   id: string;
@@ -192,175 +185,6 @@ function Reveal({
 }
 
 /* -------------------------------------------------------------------------- */
-/* Navbar                                                                     */
-/* -------------------------------------------------------------------------- */
-
-function Navbar() {
-  const [menuOpen, setMenuOpen] = useState(false);
-
-  return (
-    <>
-      <div className="bg-stone-950 text-xs text-stone-300">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-2 sm:px-6 lg:px-8">
-          <div className="hidden items-center gap-4 sm:flex">
-            <span className="tracking-wide text-stone-400">
-              Follow us
-            </span>
-
-            <div className="flex items-center gap-3">
-              <a
-                href="#"
-                aria-label="Instagram"
-                className="transition-colors hover:text-amber-400"
-              >
-                Instagram
-              </a>
-
-              <a
-                href="#"
-                aria-label="Facebook"
-                className="transition-colors hover:text-amber-400"
-              >
-                Facebook
-              </a>
-            </div>
-          </div>
-
-          <div className="ml-auto flex items-center gap-4">
-            <a
-              href="tel:1-677-124-44227"
-              className="transition-colors hover:text-amber-400"
-            >
-              1-677-124-44227
-            </a>
-
-            <a
-              href="mailto:info@achiilanka.com"
-              className="hidden transition-colors hover:text-amber-400 sm:inline"
-            >
-              info@achiilanka.com
-            </a>
-          </div>
-        </div>
-      </div>
-
-      <header className="sticky top-0 z-40 border-b border-stone-100 bg-white/95 backdrop-blur">
-        <nav className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-4 py-4 sm:px-6 lg:px-8">
-          <a
-            href="/"
-            className="text-lg font-semibold tracking-tight text-stone-900"
-          >
-            Achii Lanka{" "}
-            <span className="text-amber-500">Tours</span>
-          </a>
-
-          <div className="hidden items-center gap-8 lg:flex">
-            {NAV_LINKS.map((link) => {
-              const isActive = link.label === "Reach Us";
-
-              return (
-                <a
-                  key={link.label}
-                  href={link.href}
-                  className={[
-                    "group relative pb-1 text-sm font-medium",
-                    "transition-colors hover:text-stone-950",
-                    isActive
-                      ? "text-stone-950"
-                      : "text-stone-600",
-                  ].join(" ")}
-                >
-                  {link.label}
-
-                  <span
-                    className={[
-                      "absolute bottom-0 left-0 h-0.5 bg-amber-400",
-                      "transition-all duration-300",
-                      isActive
-                        ? "w-full"
-                        : "w-0 group-hover:w-full",
-                    ].join(" ")}
-                  />
-                </a>
-              );
-            })}
-          </div>
-
-          <div className="flex items-center gap-3">
-            <a
-              href="/plan-my-trip"
-              className="hidden items-center gap-2 rounded-full bg-amber-400 px-5 py-2.5 text-sm font-semibold text-stone-900 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md sm:inline-flex"
-            >
-              Plan My Trip
-              <span aria-hidden="true">→</span>
-            </a>
-
-            <button
-              type="button"
-              onClick={() => setMenuOpen((current) => !current)}
-              aria-label={
-                menuOpen
-                  ? "Close navigation menu"
-                  : "Open navigation menu"
-              }
-              aria-expanded={menuOpen}
-              className="rounded-full p-2 text-stone-700 transition-colors hover:bg-stone-100 lg:hidden"
-            >
-              <svg
-                viewBox="0 0 24 24"
-                className="h-6 w-6"
-                fill="none"
-                stroke="currentColor"
-                aria-hidden="true"
-              >
-                {menuOpen ? (
-                  <path
-                    d="M6 6l12 12M18 6L6 18"
-                    strokeWidth="1.8"
-                    strokeLinecap="round"
-                  />
-                ) : (
-                  <path
-                    d="M4 7h16M4 12h16M4 17h16"
-                    strokeWidth="1.8"
-                    strokeLinecap="round"
-                  />
-                )}
-              </svg>
-            </button>
-          </div>
-        </nav>
-
-        {menuOpen && (
-          <div className="border-t border-stone-100 bg-white px-4 pb-5 lg:hidden">
-            <div className="mx-auto flex max-w-7xl flex-col gap-1 pt-3">
-              {NAV_LINKS.map((link) => (
-                <a
-                  key={link.label}
-                  href={link.href}
-                  onClick={() => setMenuOpen(false)}
-                  className="rounded-xl px-3 py-3 text-sm font-medium text-stone-700 transition-colors hover:bg-stone-50 hover:text-stone-950"
-                >
-                  {link.label}
-                </a>
-              ))}
-
-              <a
-                href="/plan-my-trip"
-                onClick={() => setMenuOpen(false)}
-                className="mt-2 rounded-full bg-amber-400 px-5 py-3 text-center text-sm font-semibold text-stone-900"
-              >
-                Plan My Trip
-              </a>
-            </div>
-          </div>
-        )}
-      </header>
-    </>
-  );
-}
-
-/* -------------------------------------------------------------------------- */
 /* Intro + Contact Channels                                                   */
 /* -------------------------------------------------------------------------- */
 
@@ -407,14 +231,10 @@ function IntroAndChannels() {
               <a
                 href={channel.href}
                 target={
-                  channel.id === "whatsapp"
-                    ? "_blank"
-                    : undefined
+                  channel.id === "whatsapp" ? "_blank" : undefined
                 }
                 rel={
-                  channel.id === "whatsapp"
-                    ? "noreferrer"
-                    : undefined
+                  channel.id === "whatsapp" ? "noreferrer" : undefined
                 }
                 className="mt-6 inline-flex items-center gap-2 rounded-full bg-amber-400 px-5 py-2.5 text-sm font-semibold text-stone-900 transition-all hover:-translate-y-0.5 hover:shadow-md"
               >
@@ -426,6 +246,7 @@ function IntroAndChannels() {
         </div>
       </Reveal>
 
+      {/* Floating WhatsApp button */}
       <a
         href="https://wa.me/94771234567"
         target="_blank"
@@ -460,9 +281,7 @@ function validateForm(values: FormState): FormErrors {
 
   if (!values.email.trim()) {
     errors.email = "Please enter your email address.";
-  } else if (
-    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)
-  ) {
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)) {
     errors.email = "Please enter a valid email address.";
   }
 
@@ -487,8 +306,7 @@ function FormSection() {
   });
 
   const [errors, setErrors] = useState<FormErrors>({});
-  const [status, setStatus] =
-    useState<SubmitStatus>("idle");
+  const [status, setStatus] = useState<SubmitStatus>("idle");
 
   const handleChange =
     (field: keyof FormState) =>
@@ -510,7 +328,9 @@ function FormSection() {
       }
     };
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (
+    event: FormEvent<HTMLFormElement>,
+  ) => {
     event.preventDefault();
 
     const validationErrors = validateForm(values);
@@ -527,12 +347,10 @@ function FormSection() {
       /*
        * Temporary frontend submission state.
        *
-       * Connect this section to the approved Contact Us backend /
-       * Google Form / API when the final submission workflow is supplied.
+       * Connect this section to your contact API/backend
+       * when the final submission workflow is available.
        */
-      await new Promise((resolve) =>
-        setTimeout(resolve, 900),
-      );
+      await new Promise((resolve) => setTimeout(resolve, 900));
 
       setStatus("success");
 
@@ -606,6 +424,7 @@ function FormSection() {
       noValidate
       className="flex flex-col gap-4"
     >
+      {/* Name */}
       <div>
         <label
           htmlFor="contact-name"
@@ -637,6 +456,7 @@ function FormSection() {
         )}
       </div>
 
+      {/* Email */}
       <div>
         <label
           htmlFor="contact-email"
@@ -670,6 +490,7 @@ function FormSection() {
         )}
       </div>
 
+      {/* Subject */}
       <div>
         <label
           htmlFor="contact-subject"
@@ -688,6 +509,7 @@ function FormSection() {
         />
       </div>
 
+      {/* Comment */}
       <div>
         <label
           htmlFor="contact-comment"
@@ -708,9 +530,7 @@ function FormSection() {
               ? "contact-comment-error"
               : undefined
           }
-          className={`${inputClass(
-            "comment",
-          )} resize-none`}
+          className={`${inputClass("comment")} resize-none`}
         />
 
         {errors.comment && (
@@ -723,6 +543,7 @@ function FormSection() {
         )}
       </div>
 
+      {/* Error */}
       {status === "error" && (
         <div
           role="alert"
@@ -734,6 +555,7 @@ function FormSection() {
         </div>
       )}
 
+      {/* Submit */}
       <button
         type="submit"
         disabled={status === "loading"}
@@ -765,9 +587,7 @@ function FormSection() {
           </svg>
         )}
 
-        {status === "loading"
-          ? "Sending..."
-          : "Submit"}
+        {status === "loading" ? "Sending..." : "Submit"}
 
         {status !== "loading" && (
           <span aria-hidden="true">→</span>
@@ -852,10 +672,7 @@ function ContactAndInfo() {
 
                 <p className="text-sm leading-relaxed text-stone-500">
                   {OFFICE_LINES.map((line) => (
-                    <span
-                      key={line}
-                      className="block"
-                    >
+                    <span key={line} className="block">
                       {line}
                     </span>
                   ))}
@@ -888,10 +705,7 @@ function ContactAndInfo() {
 
                 <p className="text-sm leading-relaxed text-stone-500">
                   {HOURS_LINES.map((line) => (
-                    <span
-                      key={line}
-                      className="block"
-                    >
+                    <span key={line} className="block">
                       {line}
                     </span>
                   ))}
@@ -956,14 +770,16 @@ function ContactAndInfo() {
 /* -------------------------------------------------------------------------- */
 
 function MapSection() {
+  const mapUrl = `https://www.google.com/maps?q=${encodeURIComponent(
+    MAP_QUERY,
+  )}&output=embed`;
+
   return (
     <section aria-label="Office location">
       <div className="h-[420px] w-full border-y border-stone-100 sm:h-[520px]">
         <iframe
           title="Achii Lanka Tours office location"
-          src={`https://www.google.com/maps?q=${encodeURIComponent(
-            MAP_QUERY,
-          )}&output=embed`}
+          src={mapUrl}
           loading="lazy"
           referrerPolicy="no-referrer-when-downgrade"
           className="h-full w-full grayscale-[10%]"
@@ -974,201 +790,17 @@ function MapSection() {
 }
 
 /* -------------------------------------------------------------------------- */
-/* Footer                                                                     */
-/* -------------------------------------------------------------------------- */
-
-const FOOTER_COLUMNS = [
-  {
-    title: "Tours",
-    links: [
-      { label: "All Tours", href: "/tours" },
-      { label: "Day Tours", href: "/tours?type=day" },
-      { label: "Round Tours", href: "/tours?type=round" },
-    ],
-  },
-  {
-    title: "Navigation",
-    links: [
-      { label: "Home", href: "/" },
-      { label: "Where to Go", href: "/explore" },
-      { label: "What to Do", href: "/activities" },
-      { label: "Reach Us", href: "/contact" },
-      { label: "Our Story", href: "/about" },
-    ],
-  },
-  {
-    title: "Explore",
-    links: [
-      {
-        label: "Beaches",
-        href: "/explore?experience=beaches",
-      },
-      {
-        label: "Hill Country",
-        href: "/explore?experience=hill-country",
-      },
-      {
-        label: "Wildlife",
-        href: "/explore?experience=wildlife",
-      },
-      {
-        label: "Heritage & Culture",
-        href: "/explore?experience=heritage",
-      },
-      {
-        label: "Tea Trails",
-        href: "/explore?experience=tea-trails",
-      },
-    ],
-  },
-];
-
-function Footer() {
-  return (
-    <footer className="overflow-hidden bg-stone-100 pt-16">
-      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-10 px-4 sm:px-6 md:grid-cols-2 lg:grid-cols-5 lg:px-8">
-        {/* Brand */}
-        <div className="md:col-span-2 lg:col-span-2">
-          <a
-            href="/"
-            className="text-lg font-semibold tracking-tight text-stone-900"
-          >
-            Achii Lanka{" "}
-            <span className="text-amber-500">Tours</span>
-          </a>
-
-          <p className="mt-4 max-w-sm text-sm leading-7 text-stone-500">
-            A Sri Lankan tour operator based in Colombo. We
-            run our own tours, with our own drivers and guides
-            so the people you book with are the people who look
-            after you here.
-          </p>
-
-          <a
-            href="/plan-my-trip"
-            className="mt-6 inline-flex items-center gap-2 rounded-full bg-amber-400 px-5 py-2.5 text-sm font-semibold text-stone-900 transition-all hover:-translate-y-0.5 hover:shadow-md"
-          >
-            Plan My Trip
-            <span aria-hidden="true">→</span>
-          </a>
-        </div>
-
-        {/* Columns */}
-        {FOOTER_COLUMNS.map((column) => (
-          <div key={column.title}>
-            <h3 className="text-sm font-semibold text-stone-900">
-              {column.title}
-            </h3>
-
-            <ul className="mt-4 space-y-2.5">
-              {column.links.map((link) => (
-                <li key={link.label}>
-                  <a
-                    href={link.href}
-                    className="text-sm text-stone-500 transition-colors hover:text-amber-600"
-                  >
-                    {link.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
-
-        {/* Contact */}
-        <div>
-          <h3 className="text-sm font-semibold text-stone-900">
-            Contact us
-          </h3>
-
-          <div className="mt-4 space-y-3 text-sm text-stone-500">
-            <a
-              href="tel:1-677-124-44227"
-              className="block hover:text-amber-600"
-            >
-              1-677-124-44227
-            </a>
-
-            <p>
-              Eighth Avenue 487,
-              <br />
-              New York
-            </p>
-
-            <a
-              href="mailto:info@achiilanka.com"
-              className="block hover:text-amber-600"
-            >
-              info@achiilanka.com
-            </a>
-          </div>
-
-          <h3 className="mt-7 text-sm font-semibold text-stone-900">
-            Social Media
-          </h3>
-
-          <div className="mt-3 flex gap-4 text-sm text-stone-500">
-            <a
-              href="#"
-              aria-label="Facebook"
-              className="transition-colors hover:text-amber-600"
-            >
-              Facebook
-            </a>
-
-            <a
-              href="#"
-              aria-label="Instagram"
-              className="transition-colors hover:text-amber-600"
-            >
-              Instagram
-            </a>
-          </div>
-        </div>
-      </div>
-
-      {/* Copyright */}
-      <div className="mx-auto mt-12 max-w-7xl border-t border-stone-200 px-4 py-5 text-xs text-stone-400 sm:px-6 lg:px-8">
-        © 2026 Achii Lanka Tours — All rights reserved.
-      </div>
-
-      {/* Decorative footer image */}
-      <div className="relative h-40 overflow-hidden sm:h-56">
-        <img
-          src="https://picsum.photos/seed/achii-contact-footer/1800/500"
-          alt=""
-          loading="lazy"
-          className="absolute inset-0 h-full w-full object-cover opacity-60"
-        />
-
-        <div className="absolute inset-0 bg-gradient-to-t from-stone-100 via-stone-100/40 to-transparent" />
-
-        <div className="absolute inset-x-0 bottom-0 text-center">
-          <span className="text-[7rem] font-bold leading-none tracking-tight text-white/30 sm:text-[11rem]">
-            Achii
-          </span>
-        </div>
-      </div>
-    </footer>
-  );
-}
-
-/* -------------------------------------------------------------------------- */
 /* Page                                                                       */
 /* -------------------------------------------------------------------------- */
 
 export default function ContactPage() {
   return (
     <main className="min-h-screen bg-white">
-      <Navbar />
-
       <IntroAndChannels />
 
       <ContactAndInfo />
 
       <MapSection />
-
-      <Footer />
     </main>
   );
 }

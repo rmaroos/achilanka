@@ -1,15 +1,27 @@
-import type { Metadata } from 'next';
-import './globals.css';
+import type { Metadata } from "next";
+import "./globals.css";
+import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
 
 export const metadata: Metadata = {
-  title: 'Achii Lanka Tours',
-  description: 'Sri Lanka travel and tour enquiry platform.'
+  title: "Achii Lanka Tours",
+  description: "Sri Lanka travel and tour enquiry platform.",
 };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <Header />
+
+        {children}
+
+        <Footer />
+      </body>
     </html>
   );
 }
